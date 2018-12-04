@@ -3,6 +3,7 @@ from nltk.tokenize import word_tokenize
 from mltk import pos_tag
 from nltk.chunk import ne_chunk
 import wikipedia
+import rdflib
 
 #define the topic
 e = ""
@@ -10,7 +11,7 @@ topic = "Nvidia"
 #topic = "nvidia"
 
 try:
-    #grab the summary
+    #grab the wikipedia summary
     entity = str(wikipedia.summary(topic,sentences=4).encode('utf-8'))
 
     #apply NLP processes
@@ -74,3 +75,32 @@ try:
 except wikipedia.exceptions.WikipediaExceptionas e:
     print e
     print"Wikipedia says to disambiguate"
+
+
+### Dbpedia, augments wikipedia with semantic connections between concepts
+dbpedia_url = 'http://dbpedia.org/resource/{}'.format(topic)
+
+# create rdf graph and populate it with rdf triples
+grf = rdflib.Graph()
+grf.parse(dbpedia_url)
+
+# find out if our topic refers to multiple topics
+query = (rdflib.URIRef(dbpedia_url),
+         rdflib.URIRef('http://dbpedia.org/ontology/wikiPageDisambiguates'),
+         None)
+multiples = list(grf.triples(query))
+
+# print out multiple meanings
+if len(multiples) > 1:
+    print ("Your topic {}:".format(dbpedia_url))
+    for subject, verb, object in multiples:
+        print('-----can mean : {}'.format(object))
+else:
+    query = (rdflib.URIRef(dbpedia_url),
+             rdflib.URIRef('http://dbpedia.org/ontology/abstract'),
+             None)
+    summary = list(grf.triples(query))
+    for subject, verb, object in summary:
+        if object.language == 'en':
+            print(object.encode('utf-8'))
+
