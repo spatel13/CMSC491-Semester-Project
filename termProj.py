@@ -29,7 +29,6 @@ try:
     #apply NLP processes
     tokens = word_tokenize(removeUnicode(entity))
     gmrTags = pos_tag(tokens)
-    print(gmrTags)
     gmrChunks = ne_chunk(gmrTags, binary=True)
 
     #print summary
@@ -118,15 +117,14 @@ else:
 
 def summarizeAndBigram(filename, url):
     # Creating a file object and requesting the html from the link given
-    fileObj = codecs.open(filename,"w","UTF")
-    html = requests.get(url)
+    headers = {'User-Agent':'Mozilla/5.0'}
+    html = requests.get(url, headers=headers)
     soup = BeautifulSoup(html.text,'html5lib')
 
-    all_paras = soup.find_all('p')
-    
+    all_paras = soup.find_all("div", {"class": "has-content-area"})
+
     data_2018=""
     for para in all_paras:
-	fileObj.write(para.text)
 	data_2018 = data_2018 + para.text
 	
     article_sum = ru.summarize(data_2018)
