@@ -27,7 +27,7 @@ try:
     entity = str(wikipedia.summary(topic,sentences=4).encode('utf-8'))
 
     #apply NLP processes
-    tokens = word_tokenize(entity)
+    tokens = word_tokenize(removeUnicode(entity))
     gmrTags = pos_tag(tokens)
     print(gmrTags)
     gmrChunks = ne_chunk(gmrTags, binary=True)
@@ -73,7 +73,7 @@ try:
     #undup the named entities
     gmrList = []
     for gmrNE in gmrEntity:
-        gmrlist.append(gmrNE)
+        gmrList.append(gmrNE)
     gmrSet = set(gmrList)
 
     #loop thru set and find meanings of the named entities
@@ -88,8 +88,7 @@ try:
 except wikipedia.exceptions.WikipediaException as e:
     print e
     print"Wikipedia says to disambiguate"
-
-
+    
 ### Dbpedia, augments wikipedia with semantic connections between concepts
 dbpedia_url = 'http://dbpedia.org/resource/{}'.format(topic)
 
@@ -148,7 +147,7 @@ def summarizeAndBigram(filename, url):
     N = 25
     search = nltk.BigramCollocationFinder.from_words(bigWords)
     search.apply_freq_filter(2)
-    search.apply_word_filter(lambda skips: skips in nltk.corpus.stopwords.words('English'))
+    search.apply_word_filter(lambda skips: skips in nltk.corpus.stopwords.words('english'))
     
     from nltk import BigramAssocMeasures
     idxJaccard = BigramAssocMeasures.jaccard
@@ -157,6 +156,9 @@ def summarizeAndBigram(filename, url):
     # Print the bigrams after the filter have been applied
     for bigram in bigrams:
 	print str(bigram[0]).encode('utf-8')," ", str(bigram[1]).encode('utf-8')
+
+    print
+    print
 
 filename = "scientist.rtf"
 url = "https://blogs.nvidia.com/blog/2018/06/20/nvidia-chief-scientist-bill-dally-on-how-gpus-ignitied-ai-and-where-his-teams-headed-next/"
